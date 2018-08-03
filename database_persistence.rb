@@ -1,9 +1,12 @@
-require "pry"
 require "pg"
 
 class DatabasePersistence
   def initialize(logger)               #The logger is passed in from the "before" method found in the todo.rb file; look there for more details on its purpose  
-    @db = PG.connect(dbname: "todos")  #Create new connections to DB and store in the @db instance variable 
+    @db = if Sinatra::Base.production? #Create new connections to DB and store in the @db instance variable; other lines added when setting up program for use with Heroku
+        PG.connect(ENV['DATABASE_URL'])
+      else
+        PG.connect(dbname: "todos")
+      end
     @logger = logger 
   end
 

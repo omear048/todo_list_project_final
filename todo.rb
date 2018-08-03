@@ -1,7 +1,6 @@
 =begin
   180 SQL and Relational Database > Database-backed Web Applications > Assignments   
 =end
-require "pry"
 require "sinatra"
 require "sinatra/reloader"
 require "sinatra/content_for"
@@ -85,7 +84,11 @@ before do
                                              #Passing in the Sinatra provided logger object which has a bunch of methods that can be used 
 end                                          #The logger is then passed inbto the initialize method within the database_persistence.rb file 
 
-get "/" do
+after do
+  @storage.disconnect
+end
+
+get "/" do            #We're using Heroku's free hobby-dev PostgreSQL database plan, which only allows for a maximum of 20 open database connections at once. If we exceed this limit, then our application will throw an error. Add the following code into your application to ensure that you don't exceed that 20 connection limit.
   redirect "/lists"
 end
 

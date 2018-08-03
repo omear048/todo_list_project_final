@@ -4,6 +4,11 @@ class SessionPersistence
     @session[:lists] ||= []
   end
 
+  #We're using Heroku's free hobby-dev PostgreSQL database plan, which only allows for a maximum of 20 open database connections at once. If we exceed this limit, then our application will throw an error. Add the following code into your application to ensure that you don't exceed that 20 connection limit.
+  def disconnect
+    @db.close
+  end
+
   def find_list(id)
     @session[:lists].find { |l| l[:id] == id }
   end

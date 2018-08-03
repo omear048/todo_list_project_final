@@ -1,4 +1,3 @@
-#Create tables requested in 180 SQL and Relational Database > Database-backed Web Applications > Designing a Schema    
 
 CREATE TABLE lists (
     id serial PRIMARY KEY,
