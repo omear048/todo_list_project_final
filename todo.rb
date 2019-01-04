@@ -1,6 +1,5 @@
-=begin
-  180 SQL and Relational Database > Database-backed Web Applications > Assignments   
-=end
+# To rub file > ruby todo.rb > http://localhost:4567
+
 require "sinatra"
 require "sinatra/reloader"
 require "sinatra/content_for"
@@ -14,7 +13,6 @@ configure do
   set :erb, escape_html: true
 end             
 
-
 configure(:development) do          #Allows to only use the following configurations when in a dev env
   require "sinatra/reloader"
   also_reload "database_persistence.rb" #Whenever a new request comes in this file will reload as well keeping you from needing to kill the program everytime a change is made
@@ -22,19 +20,11 @@ end
 
 helpers do
   def list_complete?(list)
-    todos_count(list) > 0 && todos_remaining_count(list) == 0
+    list[:todos_count] > 0 && list[:todos_remaining_count] == 0
   end
 
   def list_class(list)
     "complete" if list_complete?(list)
-  end
-
-  def todos_count(list)
-   list[:todos].size
-  end
-
-  def todos_remaining_count(list)
-    list[:todos].count { |todo| !todo[:completed] }
   end
 
   def sort_lists(lists, &block)
@@ -51,8 +41,6 @@ helpers do
     complete_todos.each(&block)
   end
 end
-
-
 
 def load_list(id)
   list = @storage.find_list(id)
@@ -84,9 +72,11 @@ before do
                                              #Passing in the Sinatra provided logger object which has a bunch of methods that can be used 
 end                                          #The logger is then passed inbto the initialize method within the database_persistence.rb file 
 
+=begin
 after do
   @storage.disconnect
 end
+=end
 
 get "/" do            #We're using Heroku's free hobby-dev PostgreSQL database plan, which only allows for a maximum of 20 open database connections at once. If we exceed this limit, then our application will throw an error. Add the following code into your application to ensure that you don't exceed that 20 connection limit.
   redirect "/lists"
@@ -122,6 +112,7 @@ end
 get "/lists/:id" do
   @list_id = params[:id].to_i
   @list = load_list(@list_id)
+  @todos = @storage.find_todos_for_list(@list_id)
   erb :list, layout: :layout
 end
 
@@ -220,52 +211,6 @@ post "/lists/:id/complete_all" do
   session[:success] = "All todos have been completed."
   redirect "/lists/#{@list_id}"
 end
-
-=begin 
-Purpose of Exercise: #4 Extracting Session Manipulation Code 
-  1) Look through the rest of the code in the .rb file in the different routes and methods 
-     make sure that any references to the :session are moved to the session persistance class
-     and then replaced with the appropriate method call to the storage instance variable that 
-     are creating in the before block.  
-
-  2) In this Exercise we extracted all of the session code where we're interacting with values within the 
-     session out of our Sinatra application and into the new Class Session Persistence. 
-     And in doing so we have donw a few things 1) We've moved all of that code into one place so if we wanted
-     to replace the use of the session with a different data store which is out intention in this
-     case it's much easier to do because the code that we need to change is in one place. 
-     2) The other benefit that we get from doing this is we get to see this API that starts to 
-     emerge on the session persistance class and doing that we can get an idea of what kind of 
-     operations we will be performing and this gives us a really good idea of what the core funtionality
-     of the API is able to do and our application is providing.   
-
-
-Purpose of Exercise: #5 Designing a Schema (Work found in the Schema.sql file)
-  1) We're going to need to design a database schema that will hold the data for our todo lists 
-  and items. The following tables describe the attributes of these entities that we'll need to 
-  store:
-    List
-      - Has a unique name
-    Todo
-      - Has a name
-      - Belongs to a list
-      - Can be completed, but should default to not be completed
-
-Purpose of Exercise: #6 Setting up a Database Connection
-  1) Take the DB created in the last assignment and connect through it from the Ruby process
-  in the Sinatra application, we're also going to be doing a littel bit of project cleanup. 
-  We're going to move the Session Persistence Class into its own file and then copy that 
-  file into a new file called database_persistence and once inside there we will craft the 
-  DB Persistence class that we will eventually use.  
-
-Purpose of Exercise: #7 Executing and Logging Database Queries 
-
-
-
-=end
-
-
-
-
 
 
 

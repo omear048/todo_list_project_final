@@ -1,0 +1,8 @@
+SELECT l.*, 
+COUNT(t.id) AS todos_count, COUNT(NULLIF(t.completed, true)) AS todos_remaining
+FROM lists l
+LEFT JOIN todos t
+ON l.id = t.list_id
+GROUP BY l.id
+ORDER BY lists.name;
+
